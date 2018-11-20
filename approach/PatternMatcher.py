@@ -46,7 +46,7 @@ class PatternMatcher():
         return None
 
     def movie_of_length(self):
-        match = re.search(r'.*(?:movi\w+|film\w*).*(?:(longer|greater) | (shorter|less))\D*(\d+).*(?:(hour\w*|hr\w*)|(minut\w+|min\w*)|(second\w*|sec\w*))', self.query)
+        match = re.search(r'.*(?:movi\w+|film\w*).*(?:(longer|greater)|(shorter|less))\D*(\d+).*(?:(hour\w*|hr\w*)|(minut\w+|min\w*)|(second\w*|sec\w*))', self.query)
 
         if match:
             if match.group(1):
@@ -65,13 +65,22 @@ class PatternMatcher():
                     return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3)) / 60))
         return None
 
-    #def movie_by_popularity():
+    def movie_by_popularity(self):
+        match = re.search(r'.*(?:(popular\w*|trend\w*)|(unpopular\w*|not trend\w*)).*(?:movi\w+|film\w*).*', self.query)
 
-    #def movies_by_director():
+        if match:
+            if match.group(1):
+                return 'SELECT * FROM movies m ORDER BY m.popularity DESC LIMIT 12;'
+            if match.group(2):
+                return 'SELECT * FROM movies m ORDER BY m.popularity ASC LIMIT 12;'
 
-    #def videos_for_movie():
+        return None
 
-    #def movies_in_movie_series():
+    #def movies_by_director(self):
+
+    #def videos_for_movie(self):
+
+    #def movies_in_movie_series(self):
 
 if __name__ == '__main__':
     print('Testing Pattern Matching Approach')
@@ -82,9 +91,6 @@ if __name__ == '__main__':
 
     # for one row only
     #c.execute().fetchone()
-    
-    #print(PatternMatcher('horror comedy action movies').movie_of_genre())
-    #print(PatternMatcher('horror action comedy movies').movie_of_genre())
 
     # for multiple rows
     for row in c.execute(PatternMatcher('comedy movies').movie_of_genre()):
