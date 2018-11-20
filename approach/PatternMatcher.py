@@ -43,8 +43,8 @@ class PatternMatcher():
         if matches:
             genres = list(filter(None, [genre for sublist in matches for genre in sublist]))
 
-            return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE name = \'{}\' GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
-                
+            return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE name = \'{}\' COLLATE NOCASE GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
+            
         return None
 
     #def movie_of_length():

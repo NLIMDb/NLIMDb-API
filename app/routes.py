@@ -1,6 +1,7 @@
-from flask import make_response, jsonify
+from flask import make_response, jsonify, request
 
 from app import app
+from approach.PatternMatcher import *
 
 @app.route('/')
 def ping():
@@ -19,7 +20,11 @@ def ping():
 
     return make_response(jsonify(response), 200, headers)
 
-
+@app.route('/api/get_movie')
+def get_movie():
+    query = request.get_json()
+    headers = {'Content-Type': 'application/json'}
+    return make_response(PatternMatcher(query).movie_of_genre(), 200, headers)
 
 
 @app.errorhandler(400)
