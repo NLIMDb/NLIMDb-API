@@ -6,8 +6,6 @@ class PatternMatcher():
     def __init__(self, query):
         self.query = str(query).lower()
 
-
-    # Movie Table Queries
     def movie_featuring_actor(self):
         match = re.search(r'.*(?:movi\w+|film\w*).*(?:featur\w+|actor\w*|actress\w*|with\b)(.+)\b', self.query)
         
@@ -18,7 +16,7 @@ class PatternMatcher():
 
         return None
 
-    def movie_release_year(self):
+    def movie_release_date(self):
         match = re.search(r'(?:(([12]\d{3})\D{1,2}(0[1-9]|1[0-2])\D{1,2}(0[1-9]|[12]\d|3[01]))|((0[1-9]|[12]\d|3[01])\D{1,2}(0[1-9]|1[0-2])\D{1,2}([12]\d{3})))|([12]\d{3})', self.query)
         
         if match:
@@ -38,26 +36,52 @@ class PatternMatcher():
 
 
     def movie_of_genre(self):
-        matches = re.findall('(action)|(adventure)|(animation)|(comedy)|(crime)|(documentary)|(drama)|(family)|(fantasy)|(history)|(horror)|(music)|(mystery)|(romance)|(science fiction)|(tv movie)|(thriller)|(war)|(western)', self.query)
+        matches = re.findall(r'(action)|(adventure)|(animation)|(comedy)|(crime)|(documentary)|(drama)|(family)|(fantasy)|(history)|(horror)|(music)|(mystery)|(romance)|(science fiction)|(tv movie)|(thriller)|(war)|(western)', self.query)
 
         if matches:
             genres = list(filter(None, [genre for sublist in matches for genre in sublist]))
 
-            return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE name = \'{}\' COLLATE NOCASE GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
-            
+
+            return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE (name = \'{}\' COLLATE NOCASE) GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
+                
         return None
 
-    #def movie_of_length():
+    def movie_of_length(self):
+        match = re.search(r'.*(?:movi\w+|film\w*).*(?:(longer|greater)|(shorter|less))\D*(\d+).*(?:(hour\w*|hr\w*)|(minut\w+|min\w*)|(second\w*|sec\w*))', self.query)
 
-    #def movie_by_popularity():
+        if match:
+            if match.group(1):
+                if(match.group(4)):
+                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3)) * 60))
+                elif(match.group(5)):
+                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3))))
+                elif(match.group(6)):
+                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3)) / 60))
+            if match.group(2):
+                if(match.group(4)):
+                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3)) * 60))
+                elif(match.group(5)):
+                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3))))
+                elif(match.group(6)):
+                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3)) / 60))
+        return None
 
-    #def movies_by_director():
+    def movie_by_popularity(self):
+        match = re.search(r'.*(?:(popular\w*|trend\w*)|(unpopular\w*|not trend\w*)).*(?:movi\w+|film\w*).*', self.query)
 
-    #def videos_for_movie():
+        if match:
+            if match.group(1):
+                return 'SELECT * FROM movies m ORDER BY m.popularity DESC LIMIT 12;'
+            if match.group(2):
+                return 'SELECT * FROM movies m ORDER BY m.popularity ASC LIMIT 12;'
 
-    #def movies_in_movie_series():
+        return None
 
-    #def person_by_popularity():
+    #def movies_by_director(self):
+
+    #def videos_for_movie(self):
+
+    #def movies_in_movie_series(self):
 
 if __name__ == '__main__':
     print('Testing Pattern Matching Approach')
@@ -68,9 +92,9 @@ if __name__ == '__main__':
 
     # for one row only
     #c.execute().fetchone()
-    
+
     # for multiple rows
-    for row in c.execute(PatternMatcher('horror comedy action movies').movie_of_genre()):
+    for row in c.execute(PatternMatcher('comedy movies').movie_of_genre()):
         print(row)
 
     
