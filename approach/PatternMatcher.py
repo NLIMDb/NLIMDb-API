@@ -1,4 +1,5 @@
 import re
+import sqlite3
 
 class PatternMatcher():
 
@@ -45,6 +46,7 @@ class PatternMatcher():
             return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE name = \'{}\' GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
                 
         return None
+
     #def movie_of_length():
 
     #def movie_by_popularity():
@@ -60,9 +62,15 @@ class PatternMatcher():
 if __name__ == '__main__':
     print('Testing Pattern Matching Approach')
 
-    #print(PatternMatcher('film featuring Brad Pit').movie_featuring_actor())
+    conn = sqlite3.connect('NLIM.db')
 
-    #print(PatternMatcher('Movies released in 23,12,1999').movie_release_year())
+    c = conn.cursor()
 
-    print(PatternMatcher('horror action movies').movie_of_genre())
+    # for one row only
+    #c.execute().fetchone()
+    
+    # for multiple rows
+    for row in c.execute(PatternMatcher('horror comedy action movies').movie_of_genre()):
+        print(row)
+
     
