@@ -77,9 +77,15 @@ class PatternMatcher():
 
         return None
 
-    #def movies_by_director(self):
+    def movies_by_director(self):
+        match = re.search(r'.*(?:movi\w+|film\w*).*(?:direct\w+|by)(.+)\b', self.query)
 
-    #def videos_for_movie(self):
+        if match:
+            director = match.group(1).strip()
+
+            return 'SELECT * FROM movies m, people p, crew_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND c.job = \'Director\' AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(director)
+
+        return None
 
     #def movies_in_movie_series(self):
 
@@ -90,11 +96,12 @@ if __name__ == '__main__':
 
     c = conn.cursor()
 
+
     # for one row only
     #c.execute().fetchone()
-
+    
     # for multiple rows
-    for row in c.execute(PatternMatcher('comedy movies').movie_of_genre()):
+    for row in c.execute(PatternMatcher('Movies directed by Steven Spielberg').movies_by_director()):
         print(row)
 
     
