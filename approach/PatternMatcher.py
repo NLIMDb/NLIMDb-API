@@ -87,7 +87,13 @@ class PatternMatcher():
 
         return None
 
-    #def movies_in_movie_series(self):
+    def movies_in_movie_series(self):
+        match = re.search(r'.*(?:movi\w+|film\w*).*(?:in|part of)(.+)(?:series|saga)', self.query)
+
+        if match:
+            movie_series = match.group(1).strip()
+
+            return 'SELECT * FROM movies m, part_of_series p, movie_series s WHERE m.id = p.movie_id AND p.movie_series_id = s.id AND s.name LIKE \'{}%\' COLLATE NOCASE;'.format(movie_series)
 
 if __name__ == '__main__':
     print('Testing Pattern Matching Approach')
@@ -99,9 +105,8 @@ if __name__ == '__main__':
 
     # for one row only
     #c.execute().fetchone()
-    
     # for multiple rows
-    for row in c.execute(PatternMatcher('Movies directed by Steven Spielberg').movies_by_director()):
+    for row in c.execute(PatternMatcher('Movies part of star wars series.').movies_in_movie_series()):
         print(row)
 
     
