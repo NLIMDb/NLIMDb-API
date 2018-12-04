@@ -24,7 +24,7 @@ def ping():
 def get_movie():
     query = request.get_json()
     headers = {'Content-Type': 'application/json'}
-    return make_response(PatternMatcher(query).movie_of_genre(), 200, headers)
+    return make_response(PatternMatcher(query).run_pattern_matcher(), 200, headers)
 
 
 @app.errorhandler(400)

@@ -12,8 +12,8 @@ class PatternMatcher():
         if match:
             actor = match.group(1).strip()
             
-            return 'SELECT * FROM movies m, people p, cast_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(actor)
-
+            return 'SELECT m.* FROM movies m, people p, cast_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(actor)
+            
         return None
 
     def movie_release_date(self):
@@ -83,7 +83,7 @@ class PatternMatcher():
         if match:
             director = match.group(1).strip()
 
-            return 'SELECT * FROM movies m, people p, crew_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND c.job = \'Director\' AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(director)
+            return 'SELECT m.* FROM movies m, people p, crew_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND c.job = \'Director\' AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(director)
 
         return None
 
@@ -93,7 +93,28 @@ class PatternMatcher():
         if match:
             movie_series = match.group(1).strip()
 
-            return 'SELECT * FROM movies m, part_of_series p, movie_series s WHERE m.id = p.movie_id AND p.movie_series_id = s.id AND s.name LIKE \'{}%\' COLLATE NOCASE;'.format(movie_series)
+            return 'SELECT m.* FROM movies m, part_of_series p, movie_series s WHERE m.id = p.movie_id AND p.movie_series_id = s.id AND s.name LIKE \'{}%\' COLLATE NOCASE;'.format(movie_series)
+
+
+    def run_pattern_matcher(self):
+        query = self.movie_featuring_actor()
+
+        if(query == None):
+            query = self.movies_by_director()
+            if(query == None):
+                query = self.movies_in_movie_series()
+                if(query == None):
+                    query = self.movie_by_popularity()
+                    if(query == None):
+                        query = self.movie_of_length()
+                        if(query == None):
+                            query = self.movie_release_date()
+                            if(query == None):
+                                query = self.movie_of_genre()
+                                if(query == None):
+                                    query = ""
+                                    print("returning empty string")
+        return query
 
 if __name__ == '__main__':
     print('Testing Pattern Matching Approach')
