@@ -12,7 +12,7 @@ class PatternMatcher():
         if match:
             actor = match.group(1).strip()
             
-            return 'SELECT m.* FROM movies m, people p, cast_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(actor)
+            return 'SELECT m.* FROM movies m, people p, cast_in_movie c WHERE m.poster_path != \'\' AND m.id = c.movie_id AND p.id = c.person_id AND p.name LIKE \'{}\' LIMIT 24 COLLATE NOCASE;'.format(actor)
             
         return None
 
@@ -22,15 +22,15 @@ class PatternMatcher():
         if match:
             # YYYY-MM-DD
             if match.group(1):
-                return 'SELECT * FROM movies m WHERE m.release_date = \'{}-{}-{}\';'.format(match.group(2), match.group(3), match.group(4))
+                return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.release_date = \'{}-{}-{}\';'.format(match.group(2), match.group(3), match.group(4))
 
             # DD-MM-YYYY
             if match.group(5):
-                return 'SELECT * FROM movies m WHERE strftime(\'%d-%m-%Y\', m.release_date) =  \'{}-{}-{}\';'.format(match.group(6), match.group(7), match.group(8))
+                return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND strftime(\'%d-%m-%Y\', m.release_date) =  \'{}-{}-{}\';'.format(match.group(6), match.group(7), match.group(8))
 
             # YYYY
             if match.group(9):
-                return 'SELECT * FROM movies m WHERE strftime(\'%Y\', m.release_date) =  \'{}\';'.format(match.group(9))
+                return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND strftime(\'%Y\', m.release_date) =  \'{}\';'.format(match.group(9))
 
         return None
 
@@ -42,7 +42,7 @@ class PatternMatcher():
             genres = list(filter(None, [genre for sublist in matches for genre in sublist]))
 
 
-            return 'SELECT * FROM movies m WHERE m.id IN (SELECT movie_id FROM genres WHERE (name = \'{}\' COLLATE NOCASE) GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
+            return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.id IN (SELECT movie_id FROM genres WHERE (name = \'{}\' COLLATE NOCASE) GROUP BY movie_id HAVING COUNT(movie_id) = {});'.format('\' COLLATE NOCASE OR name = \''.join(genres), len(genres))
                 
         return None
 
@@ -52,18 +52,18 @@ class PatternMatcher():
         if match:
             if match.group(1):
                 if(match.group(4)):
-                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3)) * 60))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime > \'{}\';'.format(str(int(match.group(3)) * 60))
                 elif(match.group(5)):
-                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3))))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime > \'{}\';'.format(str(int(match.group(3))))
                 elif(match.group(6)):
-                    return 'SELECT * FROM movies m WHERE m.runtime > \'{}\';'.format(str(int(match.group(3)) / 60))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime > \'{}\';'.format(str(int(match.group(3)) / 60))
             if match.group(2):
                 if(match.group(4)):
-                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3)) * 60))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime < \'{}\';'.format(str(int(match.group(3)) * 60))
                 elif(match.group(5)):
-                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3))))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime < \'{}\';'.format(str(int(match.group(3))))
                 elif(match.group(6)):
-                    return 'SELECT * FROM movies m WHERE m.runtime < \'{}\';'.format(str(int(match.group(3)) / 60))
+                    return 'SELECT * FROM movies m WHERE m.poster_path != \'\' AND m.runtime < \'{}\';'.format(str(int(match.group(3)) / 60))
         return None
 
     def movie_by_popularity(self):
@@ -71,9 +71,9 @@ class PatternMatcher():
 
         if match:
             if match.group(1):
-                return 'SELECT * FROM movies m ORDER BY m.popularity DESC LIMIT 12;'
+                return 'SELECT * FROM movies m WHERE m.poster_path != \'\' ORDER BY m.popularity DESC LIMIT 24;'
             if match.group(2):
-                return 'SELECT * FROM movies m ORDER BY m.popularity ASC LIMIT 12;'
+                return 'SELECT * FROM movies m WHERE m.poster_path != \'\' ORDER BY m.popularity ASC LIMIT 24;'
 
         return None
 
@@ -83,7 +83,7 @@ class PatternMatcher():
         if match:
             director = match.group(1).strip()
 
-            return 'SELECT m.* FROM movies m, people p, crew_in_movie c WHERE m.id = c.movie_id AND p.id = c.person_id AND c.job = \'Director\' AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(director)
+            return 'SELECT m.* FROM movies m, people p, crew_in_movie c WHERE m.poster_path != \'\' AND m.id = c.movie_id AND p.id = c.person_id AND c.job = \'Director\' AND p.name LIKE \'{}\' COLLATE NOCASE;'.format(director)
 
         return None
 
@@ -93,7 +93,7 @@ class PatternMatcher():
         if match:
             movie_series = match.group(1).strip()
 
-            return 'SELECT m.* FROM movies m, part_of_series p, movie_series s WHERE m.id = p.movie_id AND p.movie_series_id = s.id AND s.name LIKE \'{}%\' COLLATE NOCASE;'.format(movie_series)
+            return 'SELECT m.* FROM movies m, part_of_series p, movie_series s WHERE m.poster_path != \'\' AND m.id = p.movie_id AND p.movie_series_id = s.id AND s.name LIKE \'{}%\' COLLATE NOCASE;'.format(movie_series)
 
 
     def run_pattern_matcher(self):
